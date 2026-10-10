@@ -1,0 +1,29 @@
+{
+  "title": "Milo the Moonbeam Mouse",
+  "format": "landscape",
+  "resolution": "720p",
+  "voice": "en-US-AnaNeural",
+  "rate": "-8%",
+  "seed": 88,
+  "style": "cute children's storybook illustration, soft watercolor, gentle pastel colors, magical night atmosphere, warm glowing light, adorable, high quality, friendly",
+  "character": "Milo, a tiny soft grey mouse with big shiny black eyes, pink nose, and tiny rounded ears",
+  "ai_images": false,
+  "scenes": [
+    {
+      "text": "High on a quiet rooftop lived a tiny grey mouse named Milo. Every night he watched the big, glowing moon and whispered, I wish I could touch you.",
+      "image": "Tiny soft grey mouse Milo sitting on a quiet rooftop at night, looking up at a large glowing full moon with big hopeful eyes, soft starry sky, gentle pastel watercolor style"
+    },
+    {
+      "text": "One special night a soft silver moonbeam reached down like a ladder. Milo’s whiskers twitched with courage. He climbed… and climbed… higher than any mouse had ever gone.",
+      "image": "Tiny grey mouse Milo climbing a glowing silver moonbeam ladder into the night sky, looking determined and amazed, soft magical light, stars around him, watercolor children's book style"
+    },
+    {
+      "text": "At the top of the moonbeam he met the Moon herself — round, gentle, and smiling. She gave him a tiny piece of her light to keep forever in his heart.",
+      "image": "Tiny mouse Milo meeting a kind smiling full Moon face high in the sky, Moon giving him a small glowing piece of light, soft magical golden and silver light, warm and gentle atmosphere"
+    },
+    {
+      "text": "Milo slid home on a ribbon of starlight. From that night on, whenever he felt small or scared, the warm moonbeam in his heart reminded him: even the tiniest mouse can reach the sky. The end.",
+      "image": "Tiny mouse Milo sliding happily down a ribbon of glowing starlight back to his rooftop home, holding a small glowing light in his paws, soft night sky with stars and a gentle moon, warm peaceful ending"
+    }
+  ]
+}
