@@ -1,0 +1,74 @@
+name: Render story video
+
+on:
+  workflow_dispatch:
+    inputs:
+      story:
+        description: "Story file name without .json (from the stories folder)"
+        required: true
+        default: "sample"
+  push:
+    paths:
+      - "stories/*.json"
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install ffmpeg and fonts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-dejavu-core
+
+      - name: Install Python packages
+        run: pip install -r requirements.txt
+
+      - name: Decide which stories to render
+        id: pick
+        env:
+          EVENT: ${{ github.event_name }}
+          STORY: ${{ github.event.inputs.story }}
+        run: |
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            if ! echo "$STORY" | grep -Eq '^[A-Za-z0-9_-]+$'; then echo "Bad story name"; exit 1; fi
+            FILES="stories/$STORY.json"
+          else
+            FILES=$(git diff --name-only HEAD^ HEAD -- 'stories/*.json' 2>/dev/null | tr '\n' ' ')
+            [ -z "$FILES" ] && FILES=$(ls stories/*.json | head -1)
+          fi
+          echo "files=$FILES" >> "$GITHUB_OUTPUT"
+
+      - name: Render
+        env:
+          FILES: ${{ steps.pick.outputs.files }}
+        run: |
+          for f in $FILES; do
+            echo "=== Rendering $f ==="
+            python render.py "$f"
+          done
+
+      - name: Publish as GitHub Release (direct MP4 download)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "video-${{ github.run_number }}" output/*.mp4 \
+            --title "Video #${{ github.run_number }}" \
+            --notes "Rendered by Story Studio"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: videos
+          path: output/*.mp4
