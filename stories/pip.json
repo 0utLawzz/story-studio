@@ -1,0 +1,29 @@
+{
+  "title": "Pip the Brave Little Penguin",
+  "format": "landscape",
+  "resolution": "720p",
+  "voice": "en-US-AnaNeural",
+  "rate": "-5%",
+  "seed": 77,
+  "style": "cute children's storybook illustration, soft pastel colors, watercolor, friendly, bright, high quality, adorable animals",
+  "character": "Pip, a tiny fluffy baby penguin with big curious eyes, orange beak, and a little red scarf",
+  "ai_images": true,
+  "scenes": [
+    {
+      "text": "Once upon a time, on a sparkling icy island, lived a tiny penguin named Pip who dreamed of flying.",
+      "image": "Tiny baby penguin Pip standing on shiny blue ice under a bright polar sky, wearing a little red scarf, looking up hopefully"
+    },
+    {
+      "text": "All the other penguins slid and swam, but Pip wanted to soar like the seagulls high above the waves.",
+      "image": "Pip watching big white seagulls flying over the ocean, other penguins sliding on ice in the background, soft pastel colors"
+    },
+    {
+      "text": "One windy day Pip climbed the tallest iceberg, flapped his little wings as hard as he could... and flew! Just a little bit.",
+      "image": "Pip jumping off a tall white iceberg into the air, wings spread, red scarf flying, happy surprised expression, sparkling sea below"
+    },
+    {
+      "text": "He landed softly with a happy splash. The other penguins cheered. Pip learned that being brave makes every dream possible. The end.",
+      "image": "Pip landing happily in the water with a big smile, other penguins clapping and cheering around him, golden sunlight, rainbow in the sky"
+    }
+  ]
+}
