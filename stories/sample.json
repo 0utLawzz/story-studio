@@ -1,0 +1,44 @@
+{
+  "title": "Momo the Little Cloud",
+  "format": "landscape",
+  "resolution": "720p",
+  "voice": "en-US-AnaNeural",
+  "rate": "-5%",
+  "seed": 42,
+  "style": "cute children's storybook illustration, soft pastel colors, watercolor, friendly, bright, high quality",
+  "character": "Momo, a tiny fluffy white cloud with round rosy cheeks and big happy eyes",
+  "scenes": [
+    {
+      "text": "High up in the sky lived a tiny cloud named Momo.",
+      "image": "Momo floating in a bright blue sky with a golden sun"
+    },
+    {
+      "text": "Momo loved to play, but the other clouds were big and grey, and they never had time for him.",
+      "image": "Momo small and alone next to huge grey clouds"
+    },
+    {
+      "text": "Down below, a little garden was very dry. The flowers were sad and thirsty.",
+      "image": "A dry garden with drooping flowers seen from above"
+    },
+    {
+      "text": "Momo said, I am small, but I can help!",
+      "image": "Momo with a brave smile, tiny fists raised"
+    },
+    {
+      "text": "He squeezed and squeezed, and out came the softest, gentlest rain.",
+      "image": "Momo raining gentle drops over the garden, a faint rainbow forming"
+    },
+    {
+      "text": "The flowers lifted their heads and danced in the cool, sparkling drops.",
+      "image": "Happy colorful flowers dancing in the rain"
+    },
+    {
+      "text": "The big clouds smiled. Even the smallest cloud can do something wonderful.",
+      "image": "Big grey clouds smiling warmly at Momo, golden light around him"
+    },
+    {
+      "text": "And Momo floated home, happy and proud. The end.",
+      "image": "Momo floating at sunset in a pink and orange sky with a big rainbow"
+    }
+  ]
+}
