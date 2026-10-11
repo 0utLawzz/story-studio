@@ -7,6 +7,11 @@ on:
         description: "Story file name without .json (from the stories folder)"
         required: true
         default: "sample"
+      upload_to_drive:
+        description: "Upload the finished video to Google Drive"
+        required: false
+        type: boolean
+        default: false
   push:
     paths:
       - "stories/*.json"
@@ -79,9 +84,11 @@ jobs:
           path: output/*.mp4
 
       - name: Install rclone
+        if: ${{ github.event.inputs.upload_to_drive == 'true' }}
         run: curl https://rclone.org/install.sh | sudo bash
 
       - name: Configure rclone for Google Drive (service account)
+        if: ${{ github.event.inputs.upload_to_drive == 'true' }}
         env:
           GDRIVE_SA_JSON: ${{ secrets.GDRIVE_SA_JSON }}
         run: |
@@ -96,6 +103,7 @@ jobs:
 
       - name: Upload video to Drive and get a shareable link
         id: drive
+        if: ${{ github.event.inputs.upload_to_drive == 'true' }}
         env:
           GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
         run: |
@@ -112,10 +120,11 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
+          DRIVE_LINK="${{ steps.drive.outputs.link }}"
           python scripts/publish_result.py \
             "${{ steps.render.outputs.story_name }}" \
             "${{ github.run_number }}" \
-            "${{ steps.drive.outputs.link }}" \
+            "${DRIVE_LINK:-}" \
             "${{ steps.release.outputs.url }}" \
             "success"
 
