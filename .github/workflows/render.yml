@@ -51,7 +51,12 @@ jobs:
           fi
           echo "files=$FILES" >> "$GITHUB_OUTPUT"
 
+      # CHANGE: added an "id: render" so later steps can read its outputs,
+      # and a new output "story_name" (the first story's base filename) --
+      # used to label the Sheet row and Telegram message. Nothing else in
+      # this step changed; the render itself is unaffected.
       - name: Render
+        id: render
         env:
           FILES: ${{ steps.pick.outputs.files }}
         run: |
@@ -59,16 +64,97 @@ jobs:
             echo "=== Rendering $f ==="
             python render.py "$f"
           done
+          FIRST=$(echo $FILES | awk '{print $1}')
+          echo "story_name=$(basename "$FIRST" .json)" >> "$GITHUB_OUTPUT"
 
+      # CHANGE: added "id: release" and an output "url" -- the Release's
+      # page link, used in the Sheet row and Telegram message below.
       - name: Publish as GitHub Release (direct MP4 download)
+        id: release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "video-${{ github.run_number }}" output/*.mp4 \
             --title "Video #${{ github.run_number }}" \
             --notes "Rendered by Story Studio"
+          echo "url=https://github.com/${{ github.repository }}/releases/tag/video-${{ github.run_number }}" >> "$GITHUB_OUTPUT"
 
       - uses: actions/upload-artifact@v4
         with:
           name: videos
           path: output/*.mp4
+
+      # ---------------------------------------------------------------
+      # NEW BLOCK BELOW -- everything from here down is the Drive/Sheet/
+      # Telegram addition. Only runs after a successful render + release
+      # (the steps above). See the separate failure-path step at the very
+      # bottom for what happens if render itself breaks.
+      # ---------------------------------------------------------------
+
+      - name: Install rclone
+        run: curl https://rclone.org/install.sh | sudo bash
+
+      # Writes the service account key to a temp file and points rclone at
+      # it. The key never touches the repo itself -- it only exists for
+      # the lifetime of this one job run, on GitHub's runner.
+      - name: Configure rclone for Google Drive (service account)
+        env:
+          GDRIVE_SA_JSON: ${{ secrets.GDRIVE_SA_JSON }}
+        run: |
+          mkdir -p ~/.config/rclone
+          echo "$GDRIVE_SA_JSON" > /tmp/sa.json
+          cat > ~/.config/rclone/rclone.conf << 'EOF'
+          [gdrive]
+          type = drive
+          scope = drive
+          service_account_file = /tmp/sa.json
+          EOF
+
+      # Uploads the rendered MP4 to the Drive folder you shared with the
+      # service account, then asks rclone for a shareable link to it.
+      # "id: drive" + its "link" output feed into the Sheet/Telegram step.
+      - name: Upload video to Drive and get a shareable link
+        id: drive
+        env:
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+        run: |
+          FILE=$(ls output/*.mp4 | head -1)
+          rclone copy "$FILE" "gdrive:" --drive-folder-id "$GDRIVE_FOLDER_ID"
+          LINK=$(rclone link "gdrive:$(basename "$FILE")" --drive-folder-id "$GDRIVE_FOLDER_ID")
+          echo "link=$LINK" >> "$GITHUB_OUTPUT"
+
+      # Calls the new scripts/publish_result.py -- logs a row to your
+      # Sheet and sends the Telegram message. "continue-on-error: true"
+      # means: if this step fails (e.g. Sheet not shared correctly yet),
+      # the JOB still shows as successful, because the actual video was
+      # already rendered and released by this point -- a notify hiccup
+      # shouldn't make a good render look like a failure.
+      - name: Log to Sheet + Telegram notify (success)
+        continue-on-error: true
+        env:
+          GDRIVE_SA_FILE: /tmp/sa.json
+          SHEET_ID: ${{ secrets.SHEET_ID }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python scripts/publish_result.py \
+            "${{ steps.render.outputs.story_name }}" \
+            "${{ github.run_number }}" \
+            "${{ steps.drive.outputs.link }}" \
+            "${{ steps.release.outputs.url }}" \
+            "success"
+
+      # Failure path: if ANY earlier step failed (render, release, etc.),
+      # this step runs instead ("if: failure()") and sends a plain
+      # Telegram alert via curl directly -- no Python/gspread needed,
+      # since there's no video or Drive link to log in that case.
+      - name: Telegram notify (failure)
+        if: failure()
+        continue-on-error: true
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+            -d chat_id="$TELEGRAM_CHAT_ID" \
+            -d text="Story Studio render FAILED (run #${{ github.run_number }}). Log: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
